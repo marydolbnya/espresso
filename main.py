@@ -1,42 +1,44 @@
 import sys
 import sqlite3
-from PyQt6 import uic
 from PyQt6.QtSql import QSqlDatabase, QSqlTableModel
 from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog
+from ui import Ui_MainWindow
+from addEditCoffeeForm import Ui_Form
 
-class addCoffeeForm(QDialog):
+
+class addCoffeeForm(QDialog, Ui_Form):
     def __init__(self):
         super().__init__()
-        uic.loadUi('UI/addEditCoffeeForm.ui', self)
+        self.setupUi(self)
         self.conn = sqlite3.connect('data/coffee.sqlite')
         self.cur = self.conn.cursor()
         self.setWindowTitle('Добавление новой позиции')
         self.pushButton.clicked.connect(self.save)
-        for item in  self.cur.execute('SELECT id, name FROM coffee_types').fetchall():
+        for item in self.cur.execute('SELECT id, name FROM coffee_types').fetchall():
             self.comboBox.addItem(item[1], item[0])
 
     def save(self):
         self.cur.execute(f'INSERT INTO catalog (variety_name, '
-                    f'roasting_degree, '
-                    f'type_id, '
-                    f'taste_description, '
-                    f'price, '
-                    f'package_size) '
-                    f'VALUES ("{self.lineEdit.text()}", '
-                    f'{self.spinBox.value()}, '
-                    f'{self.comboBox.currentData()}, '
-                    f'"{self.lineEdit_3.text()}", '
-                    f'{self.lineEdit_4.text()}, '
-                    f'{self.lineEdit_5.text()})')
+                         f'roasting_degree, '
+                         f'type_id, '
+                         f'taste_description, '
+                         f'price, '
+                         f'package_size) '
+                         f'VALUES ("{self.lineEdit.text()}", '
+                         f'{self.spinBox.value()}, '
+                         f'{self.comboBox.currentData()}, '
+                         f'"{self.lineEdit_3.text()}", '
+                         f'{self.lineEdit_4.text()}, '
+                         f'{self.lineEdit_5.text()})')
         self.conn.commit()
         self.conn.close()
         self.close()
 
 
-class editCoffeeForm(QDialog):
+class editCoffeeForm(QDialog, Ui_Form):
     def __init__(self, record):
         super().__init__()
-        uic.loadUi('UI/addEditCoffeeForm.ui', self)
+        self.setupUi(self)
         self.conn = sqlite3.connect('data/coffee.sqlite')
         self.cur = self.conn.cursor()
         self.id = record.value('catalog.id')
@@ -47,7 +49,7 @@ class editCoffeeForm(QDialog):
         if record.value('Обжарка'):
             self.spinBox.setValue(int(record.value('Обжарка')))
         sel = -1
-        for i, item in  enumerate(self.cur.execute('SELECT id, name FROM coffee_types').fetchall()):
+        for i, item in enumerate(self.cur.execute('SELECT id, name FROM coffee_types').fetchall()):
             self.comboBox.addItem(item[1], item[0])
             if item[1] == record.value('Вид'):
                 sel = i
@@ -72,10 +74,10 @@ class editCoffeeForm(QDialog):
         self.close()
 
 
-class MyWindow(QMainWindow):
+class MyWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('UI/main.ui', self)
+        self.setupUi(self)
 
         self.query = ('SELECT catalog.id, '
                       'catalog.variety_name AS "Сорт", '
@@ -84,7 +86,7 @@ class MyWindow(QMainWindow):
                       'catalog.taste_description AS "Описание", '
                       'catalog.price AS "Цена", '
                       'catalog.package_size AS "Вес упаковки" '
-                      'FROM catalog LEFT JOIN coffee_types ON catalog.type_id = coffee_types.id')
+                      'from catalog LEFT JOIN coffee_types ON catalog.type_id = coffee_types.id')
 
         self.db = QSqlDatabase.addDatabase('QSQLITE')
         self.db.setDatabaseName('data/coffee.sqlite')
@@ -112,8 +114,6 @@ class MyWindow(QMainWindow):
         if selected:
             editCoffeeForm(self.model.record(selected[0].row())).exec()
             self.model.setQuery(self.query)
-
-
 
 
 if __name__ == '__main__':
