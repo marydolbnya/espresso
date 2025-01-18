@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Espresso</string>
+   <string>Latte Macchiato</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::RightToLeft</enum>
@@ -32,7 +32,21 @@
    <property name="layoutDirection">
     <enum>Qt::RightToLeft</enum>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>Добавить</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="text">
+       <string>Редактировать</string>
+      </property>
+     </widget>
+    </item>
     <item>
      <widget class="QTableView" name="tableView">
       <property name="layoutDirection">

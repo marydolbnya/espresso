@@ -7,13 +7,13 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog
 class addCoffeeForm(QDialog):
     def __init__(self):
         super().__init__()
-        self.conn = sqlite3.connect('coffee.sqlite')
+        uic.loadUi('UI/addEditCoffeeForm.ui', self)
+        self.conn = sqlite3.connect('data/coffee.sqlite')
         self.cur = self.conn.cursor()
-        uic.loadUi('addEditCoffeeForm.ui', self)
-        for i, item in  enumerate(self.cur.execute('SELECT id, name FROM coffee_types').fetchall()):
-            self.comboBox.addItem(item[1], item[0])
         self.setWindowTitle('Добавление новой позиции')
         self.pushButton.clicked.connect(self.save)
+        for item in  self.cur.execute('SELECT id, name FROM coffee_types').fetchall():
+            self.comboBox.addItem(item[1], item[0])
 
     def save(self):
         self.cur.execute(f'INSERT INTO catalog (variety_name, '
@@ -36,15 +36,16 @@ class addCoffeeForm(QDialog):
 class editCoffeeForm(QDialog):
     def __init__(self, record):
         super().__init__()
-        uic.loadUi('addEditCoffeeForm.ui', self)
-        self.conn = sqlite3.connect('coffee.sqlite')
+        uic.loadUi('UI/addEditCoffeeForm.ui', self)
+        self.conn = sqlite3.connect('data/coffee.sqlite')
         self.cur = self.conn.cursor()
         self.id = record.value('catalog.id')
 
         self.setWindowTitle('Изменение')
         self.pushButton.clicked.connect(self.save)
         self.lineEdit.setText(str(record.value('Сорт')))
-        self.spinBox.setValue(int(record.value('Обжарка')))
+        if record.value('Обжарка'):
+            self.spinBox.setValue(int(record.value('Обжарка')))
         sel = -1
         for i, item in  enumerate(self.cur.execute('SELECT id, name FROM coffee_types').fetchall()):
             self.comboBox.addItem(item[1], item[0])
@@ -74,7 +75,7 @@ class editCoffeeForm(QDialog):
 class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('main.ui', self)
+        uic.loadUi('UI/main.ui', self)
 
         self.query = ('SELECT catalog.id, '
                       'catalog.variety_name AS "Сорт", '
@@ -86,7 +87,7 @@ class MyWindow(QMainWindow):
                       'FROM catalog LEFT JOIN coffee_types ON catalog.type_id = coffee_types.id')
 
         self.db = QSqlDatabase.addDatabase('QSQLITE')
-        self.db.setDatabaseName('coffee.sqlite')
+        self.db.setDatabaseName('data/coffee.sqlite')
         self.db.open()
 
         self.model = QSqlTableModel(self, self.db)
